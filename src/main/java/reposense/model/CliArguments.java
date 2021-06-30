@@ -20,6 +20,7 @@ public abstract class CliArguments {
     protected boolean isShallowCloningPerformed;
     protected boolean isAutomaticallyLaunching;
     protected boolean isStandaloneConfigIgnored;
+    protected boolean isCatchingNonPrCommitsPerformed;
     protected int numCloningThreads;
     protected int numAnalysisThreads;
     protected ZoneId zoneId;
@@ -59,6 +60,8 @@ public abstract class CliArguments {
     public boolean isShallowCloningPerformed() {
         return isShallowCloningPerformed;
     }
+
+    public boolean isCatchingNonPrCommitsPerformed() { return isCatchingNonPrCommitsPerformed; }
 
     public List<FileType> getFormats() {
         return formats;

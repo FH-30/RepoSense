@@ -27,7 +27,7 @@ public class ConfigCliArguments extends CliArguments {
     public ConfigCliArguments(Path configFolderPath, Path outputFilePath, Path assetsFilePath, Date sinceDate,
             Date untilDate, boolean isSinceDateProvided, boolean isUntilDateProvided, int numCloningThreads,
             int numAnalysisThreads, List<FileType> formats, boolean isLastModifiedDateIncluded,
-            boolean isShallowCloningPerformed, boolean isAutomaticallyLaunching,
+            boolean isShallowCloningPerformed, boolean isCatchingNonPrCommitsPerformed, boolean isAutomaticallyLaunching,
             boolean isStandaloneConfigIgnored, ZoneId zoneId, ReportConfiguration reportConfiguration) {
         this.configFolderPath = configFolderPath.equals(EMPTY_PATH)
                 ? configFolderPath.toAbsolutePath()
@@ -45,6 +45,7 @@ public class ConfigCliArguments extends CliArguments {
         this.formats = formats;
         this.isLastModifiedDateIncluded = isLastModifiedDateIncluded;
         this.isShallowCloningPerformed = isShallowCloningPerformed;
+        this.isCatchingNonPrCommitsPerformed = isCatchingNonPrCommitsPerformed;
         this.isAutomaticallyLaunching = isAutomaticallyLaunching;
         this.isStandaloneConfigIgnored = isStandaloneConfigIgnored;
         this.numCloningThreads = numCloningThreads;
