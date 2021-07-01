@@ -40,6 +40,9 @@ public class CommitResultAggregator {
                 getAuthorDailyContributionsMap(config.getAuthorDisplayNameMap().keySet(), commitResults,
                         config.getZoneId());
 
+        Map<Author, Integer> authorNonPrCommitsMap = getAuthorNonPrCommitsMap(
+                config.getAuthorDisplayNameMap().keySet(), commitResults);
+
         Date lastDate = commitResults.size() == 0
                 ? null
                 : getStartOfDate(commitResults.get(commitResults.size() - 1).getTime(), config.getZoneId());
@@ -50,7 +53,8 @@ public class CommitResultAggregator {
         return new CommitContributionSummary(
                 config.getAuthorDisplayNameMap(),
                 authorDailyContributionsMap,
-                authorContributionVariance);
+                authorContributionVariance,
+                authorNonPrCommitsMap);
     }
 
     /**
@@ -119,6 +123,26 @@ public class CommitResultAggregator {
         }
 
         return authorDailyContributionsMap;
+    }
+
+    private static Map<Author, Integer> getAuthorNonPrCommitsMap (Set<Author> authorSet,
+                                                                  List<CommitResult> commitResults) {
+        Map<Author, Integer> authorNonPrCommitsMap = new HashMap<>();
+        authorSet.forEach(author -> authorNonPrCommitsMap.put(author, 0));
+
+        for (CommitResult commitResult : commitResults) {
+            Author commitAuthor = commitResult.getAuthor();
+
+            Integer authorNonPrCommits = authorNonPrCommitsMap.get(commitAuthor);
+
+            if (commitResult.isNonPrCommit()) {
+                authorNonPrCommits++;
+            }
+
+            authorNonPrCommitsMap.put(commitAuthor, authorNonPrCommits);
+        }
+
+        return authorNonPrCommitsMap;
     }
 
     private static void addDailyContributionForNewDate(

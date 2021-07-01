@@ -20,6 +20,7 @@ public class CommitReportJson {
     private final Map<Author, LinkedHashMap<FileType, Integer>> authorFileTypeContributionMap;
     private final Map<Author, Float> authorContributionVariance;
     private final Map<Author, String> authorDisplayNameMap;
+    private final Map<Author, Integer> authorNonPrCommitsMap;
 
     /**
      * Constructor to construct an empty commit report with the author's display name as {@code displayName}.
@@ -38,6 +39,9 @@ public class CommitReportJson {
 
         authorDisplayNameMap = new HashMap<>();
         authorDisplayNameMap.put(emptyAuthor, displayName);
+
+        authorNonPrCommitsMap = new HashMap<>();
+        authorNonPrCommitsMap.put(emptyAuthor, 0);
     }
 
     public CommitReportJson(CommitContributionSummary commitSummary, AuthorshipSummary authorshipSummary) {
@@ -45,5 +49,6 @@ public class CommitReportJson {
         authorFileTypeContributionMap = authorshipSummary.getAuthorFileTypeContributionMap();
         authorContributionVariance = commitSummary.getAuthorContributionVariance();
         authorDisplayNameMap = commitSummary.getAuthorDisplayNameMap();
+        authorNonPrCommitsMap = commitSummary.getAuthorNonPrCommitsMap();
     }
 }
