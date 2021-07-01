@@ -7,7 +7,14 @@ import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -43,6 +50,7 @@ public class CommitInfoAnalyzer {
     private static final String REF_SPLITTER = ",\\s";
     private static final String NEW_LINE_SPLITTER = "\\n";
     private static final String TAG_PREFIX = "tag:";
+    private static final String PR_COMMIT_INDICATOR = "class=\"pull-request\"";
 
     private static final int COMMIT_HASH_INDEX = 0;
     private static final int AUTHOR_INDEX = 1;
@@ -134,7 +142,7 @@ public class CommitInfoAnalyzer {
         String githubCommitUrl = getGithubQueryUrl(config, hash);
         String htmlContainingPrUrl = getHtml(githubCommitUrl);
 
-        boolean isNonPrCommit = !htmlContainingPrUrl.contains("class=\"pull-request\"");
+        boolean isNonPrCommit = !htmlContainingPrUrl.contains(PR_COMMIT_INDICATOR);
 
         String[] refs = (elements.length > REF_NAME_INDEX)
                 ? elements[REF_NAME_INDEX].split(REF_SPLITTER)
@@ -163,7 +171,7 @@ public class CommitInfoAnalyzer {
      * Returns the number of lines added and deleted for the specified file types in {@code config}.
      */
     private static Map<FileType, ContributionPair> getFileTypesAndContribution(String[] filePathContributions,
-            RepoConfiguration config) {
+                                                                               RepoConfiguration config) {
         Map<FileType, ContributionPair> fileTypesAndContributionMap = new HashMap<>();
         for (String filePathContribution : filePathContributions) {
             String[] infos = filePathContribution.split(TAB_SPLITTER);
