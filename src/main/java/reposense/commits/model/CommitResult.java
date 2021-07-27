@@ -15,29 +15,33 @@ public class CommitResult {
     private final String hash;
     private final String messageTitle;
     private final String messageBody;
+    private final boolean isNonPrCommit;
     private final String[] tags;
     private final Map<FileType, ContributionPair> fileTypesAndContributionMap;
 
     private final transient Author author;
     private final transient Date time;
 
-    public CommitResult(Author author, String hash, Date time, String messageTitle, String messageBody, String[] tags,
-            Map<FileType, ContributionPair> fileTypesAndContributionMap) {
+    public CommitResult(Author author, String hash, Date time, String messageTitle, String messageBody,
+                        boolean isNonPrCommit, String[] tags, Map<FileType, ContributionPair> fileTypesAndContributionMap) {
         this.author = author;
         this.hash = hash;
         this.time = time;
         this.messageTitle = messageTitle;
         this.messageBody = messageBody;
+        this.isNonPrCommit = isNonPrCommit;
         this.tags = tags;
         this.fileTypesAndContributionMap = fileTypesAndContributionMap;
     }
 
-    public CommitResult(Author author, String hash, Date time, String messageTitle, String messageBody, String[] tags) {
+    public CommitResult(Author author, String hash, Date time, String messageTitle, String messageBody,
+                        boolean isNonPrCommit, String[] tags) {
         this.author = author;
         this.hash = hash;
         this.time = time;
         this.messageTitle = messageTitle;
         this.messageBody = messageBody;
+        this.isNonPrCommit = isNonPrCommit;
         this.tags = tags;
         this.fileTypesAndContributionMap = Collections.emptyMap();
     }
@@ -65,6 +69,8 @@ public class CommitResult {
     public Date getTime() {
         return time;
     }
+
+    public boolean isNonPrCommit() { return isNonPrCommit; }
 
     public int getInsertions() {
         int insertions = 0;

@@ -56,6 +56,7 @@ public class ArgsParser {
     public static final String[] TIMEZONE_FLAGS = new String[]{"--timezone", "-t"};
     public static final String[] VERSION_FLAGS = new String[]{"--version", "-V"};
     public static final String[] LAST_MODIFIED_DATE_FLAGS = new String[]{"--last-modified-date", "-l"};
+    public static final String[] CATCH_NON_PR_COMMITS_FLAGS = new String[]{"--catch-non-pr-commits", "-C"};
 
     public static final String[] CLONING_THREADS_FLAG = new String[]{"--cloning-threads"};
     public static final String[] ANALYSIS_THREADS_FLAG = new String[]{"--analysis-threads"};
@@ -115,6 +116,12 @@ public class ArgsParser {
         parser.addArgument(VERSION_FLAGS)
                 .help("Show the version of RepoSense.")
                 .action(new VersionArgumentAction());
+
+        parser.addArgument(CATCH_NON_PR_COMMITS_FLAGS)
+                .dest(CATCH_NON_PR_COMMITS_FLAGS[0])
+                .action(Arguments.storeTrue())
+                .help("A flag to record the number of commits in the repository not merged from pull requests. "
+                        + "A breakdown will be provided for each author that contributed to the repository");
 
         parser.addArgument(IGNORE_FLAGS)
                 .dest(IGNORE_FLAGS[0])
@@ -257,6 +264,7 @@ public class ArgsParser {
             boolean isStandaloneConfigIgnored = results.get(IGNORE_FLAGS[0]);
             boolean shouldIncludeLastModifiedDate = results.get(LAST_MODIFIED_DATE_FLAGS[0]);
             boolean shouldPerformShallowCloning = results.get(SHALLOW_CLONING_FLAGS[0]);
+            boolean shouldCatchNonPrCommits = results.get(CATCH_NON_PR_COMMITS_FLAGS[0]);
 
             // Report config is ignored if --repos is provided
             if (locations == null) {
@@ -324,7 +332,7 @@ public class ArgsParser {
             if (locations != null) {
                 return new LocationsCliArguments(locations, outputFolderPath, assetsFolderPath, sinceDate, untilDate,
                         isSinceDateProvided, isUntilDateProvided, numCloningThreads, numAnalysisThreads, formats,
-                        shouldIncludeLastModifiedDate, shouldPerformShallowCloning, isAutomaticallyLaunching,
+                        shouldIncludeLastModifiedDate, shouldPerformShallowCloning, shouldCatchNonPrCommits, isAutomaticallyLaunching,
                         isStandaloneConfigIgnored, zoneId);
             }
 
@@ -333,7 +341,7 @@ public class ArgsParser {
             }
             return new ConfigCliArguments(configFolderPath, outputFolderPath, assetsFolderPath, sinceDate, untilDate,
                     isSinceDateProvided, isUntilDateProvided, numCloningThreads, numAnalysisThreads, formats,
-                    shouldIncludeLastModifiedDate, shouldPerformShallowCloning, isAutomaticallyLaunching,
+                    shouldIncludeLastModifiedDate, shouldPerformShallowCloning, shouldCatchNonPrCommits, isAutomaticallyLaunching,
                     isStandaloneConfigIgnored, zoneId, reportConfig);
         } catch (HelpScreenException hse) {
             throw hse;

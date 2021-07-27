@@ -2,15 +2,19 @@ package reposense.commits;
 
 import static reposense.util.StringsUtil.removeQuote;
 
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -46,6 +50,7 @@ public class CommitInfoAnalyzer {
     private static final String REF_SPLITTER = ",\\s";
     private static final String NEW_LINE_SPLITTER = "\\n";
     private static final String TAG_PREFIX = "tag:";
+    private static final String PR_COMMIT_INDICATOR = "class=\"pull-request\"";
 
     private static final int COMMIT_HASH_INDEX = 0;
     private static final int AUTHOR_INDEX = 1;
@@ -77,6 +82,41 @@ public class CommitInfoAnalyzer {
     }
 
     /**
+     * Get HTML from a website.
+     * Source: https://stackoverflow.com/questions/31462/how-to-fetch-html-in-java.
+     * @param site Site to query html from.
+     * @return the HTML from the given website.
+     */
+    public static String getHtml(String site) {
+        String content = null;
+        URLConnection connection = null;
+        try {
+            connection =  new URL(site).openConnection();
+            Scanner scanner = new Scanner(connection.getInputStream());
+            scanner.useDelimiter("\\Z");
+            content = scanner.next();
+            scanner.close();
+        }catch ( Exception ex ) {
+            ex.printStackTrace();
+        }
+
+        return content;
+    }
+
+    /**
+     * Get the URL which returns the pull request url that a commit hash belongs to (if any).
+     * @param config Config of the repository that the commit belongs to.
+     * @param hash Hash of the relevant commit.
+     * @return URL which returns HTML containing pull request url of given commit hash.
+     */
+    private static String getGithubQueryUrl(RepoConfiguration config, String hash) {
+        String githubCloneUrl = config.getLocation().toString();
+        String githubRepoUrl = githubCloneUrl.substring(0, githubCloneUrl.length() - 4);
+        String commitHashUrl = "/branch_commits/" + hash;
+        return githubRepoUrl + commitHashUrl;
+    }
+
+    /**
      * Extracts the relevant data from {@code commitInfo} into a {@code CommitResult}.
      */
     public static CommitResult analyzeCommit(CommitInfo commitInfo, RepoConfiguration config) {
@@ -98,6 +138,12 @@ public class CommitInfoAnalyzer {
         String messageBody = (elements.length > MESSAGE_BODY_INDEX)
                 ? getCommitMessageBody(elements[MESSAGE_BODY_INDEX]) : "";
 
+
+        String githubCommitUrl = getGithubQueryUrl(config, hash);
+        String htmlContainingPrUrl = getHtml(githubCommitUrl);
+
+        boolean isNonPrCommit = !htmlContainingPrUrl.contains(PR_COMMIT_INDICATOR);
+
         String[] refs = (elements.length > REF_NAME_INDEX)
                 ? elements[REF_NAME_INDEX].split(REF_SPLITTER)
                 : new String[]{""};
@@ -109,7 +155,7 @@ public class CommitInfoAnalyzer {
         }
 
         if (statLine.isEmpty()) { // empty commit, no files changed
-            return new CommitResult(author, hash, date, messageTitle, messageBody, tags);
+            return new CommitResult(author, hash, date, messageTitle, messageBody, isNonPrCommit, tags);
         }
 
         String[] statInfos = statLine.split(NEW_LINE_SPLITTER);
@@ -117,14 +163,15 @@ public class CommitInfoAnalyzer {
         Map<FileType, ContributionPair> fileTypeAndContributionMap =
                 getFileTypesAndContribution(fileTypeContributions, config);
 
-        return new CommitResult(author, hash, date, messageTitle, messageBody, tags, fileTypeAndContributionMap);
+        return new CommitResult(author, hash, date, messageTitle, messageBody,  isNonPrCommit,
+                tags, fileTypeAndContributionMap);
     }
 
     /**
      * Returns the number of lines added and deleted for the specified file types in {@code config}.
      */
     private static Map<FileType, ContributionPair> getFileTypesAndContribution(String[] filePathContributions,
-            RepoConfiguration config) {
+                                                                               RepoConfiguration config) {
         Map<FileType, ContributionPair> fileTypesAndContributionMap = new HashMap<>();
         for (String filePathContribution : filePathContributions) {
             String[] infos = filePathContribution.split(TAB_SPLITTER);
